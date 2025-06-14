@@ -1,6 +1,6 @@
-#include "Metric.h"
-#include "MetricRegistry.h"
-#include "MetricWriter.h"
+#include <metrics/Metric.h>
+#include <metrics/MetricRegistry.h>
+#include <metrics/MetricWriter.h>
 
 #include <chrono>
 #include <memory>
@@ -16,6 +16,7 @@ int main() {
     registry.add_metric(http);
 
     MetricWriter writer(registry, "metrics.txt", 100);
+    writer.on_console();
     writer.start();
 
     for (int i = 0; i < 100; ++i) {
