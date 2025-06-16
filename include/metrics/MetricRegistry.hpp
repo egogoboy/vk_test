@@ -30,7 +30,7 @@ public:
             std::lock_guard<std::mutex> lk(_mx);
             copy = _metrics;
         }
-        std::unordered_map<uint64_t, std::vector<std::pair<std::string, std::string>>> bins;
+        std::map<uint64_t, std::vector<std::pair<std::string, std::string>>> bins;
         for (auto& m : copy) m->collect(bins, bin_width_ms);
 
         for (auto& [ts_bin, kv] : bins) {

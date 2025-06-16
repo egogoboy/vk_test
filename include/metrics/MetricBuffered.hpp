@@ -25,7 +25,7 @@ namespace metrics {
             return _name;
         }
 
-        void collect(std::unordered_map<uint64_t,
+        void collect(std::map<uint64_t,
                                        std::vector<std::pair<std::string, std::string>>>& bins,
                      uint64_t bin_width_ms) override {
             std::deque<metrics::Sample> local;

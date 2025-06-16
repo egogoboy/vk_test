@@ -10,7 +10,7 @@ int main() {
     metrics::MetricRegistry registry;
 
     auto cpu = registry.create_metric<double, metrics::MetricBuffered>("CPU");
-    auto http = registry.create_metric<double>("HTTP requests RPS");
+    auto http = registry.create_metric<int>("HTTP requests RPS");
 
     metrics::MetricWriter writer(registry, "metrics.txt", 1000);
     writer.to_console(true);
