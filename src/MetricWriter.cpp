@@ -21,6 +21,7 @@ void metrics::MetricWriter::stop() {
     _run = false;
     if (_th.joinable()) {
         _th.join();
+        std::cout << "All metrics saved to " << _file << std::endl;
     }
 }
 
