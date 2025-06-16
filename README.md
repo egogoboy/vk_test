@@ -91,5 +91,6 @@ cd build
 cmake ..
 make
 ./tests/test_main
+./tests/speed_test
 ```
-Логи лежат в metrics.txt
+Логи лежат в `metrics.txt` и `speed_metrics.txt`
