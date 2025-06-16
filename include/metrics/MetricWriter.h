@@ -25,6 +25,7 @@ public:
 
 private:
     void _loop();
+    void _make_log(std::ofstream& fout);
 
     MetricRegistry& _reg;
     std::string _file;

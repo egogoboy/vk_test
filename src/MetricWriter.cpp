@@ -27,26 +27,32 @@ void metrics::MetricWriter::stop() {
 void metrics::MetricWriter::_loop() {
     std::ofstream fout(_file, std::ios::app);
     if (!fout) {
-        std::cerr << "Cannot open " << _file << "\n";
-        return;
+        throw std::runtime_error("Cannot open " + _file);
     }
     while (_run) {
         auto start = std::chrono::steady_clock::now();
-        std::vector<std::string> lines;
-        _reg.make_lines(lines, _bin_width);
-        for (auto& l : lines) {
-            fout << l << '\n';
-            if (_to_console) {
-                std::cout << l << '\n';
-            }
-        }
-        fout.flush();
+
+        _make_log(fout);
+
         auto spent = std::chrono::steady_clock::now() - start;
         auto sleep = std::chrono::milliseconds(_flush_ms) - spent;
         if (sleep.count() > 0) {
             std::this_thread::sleep_for(sleep);
         }
     }
+    _make_log(fout);
+}
+
+void metrics::MetricWriter::_make_log(std::ofstream& fout) {
+    std::vector<std::string> lines;
+    _reg.make_lines(lines, _bin_width);
+    for (auto& l : lines) {
+        fout << l << '\n';
+        if (_to_console) {
+            std::cout << l << '\n';
+        }
+    }
+    fout.flush();
 }
 
 void metrics::MetricWriter::to_console(bool f) {

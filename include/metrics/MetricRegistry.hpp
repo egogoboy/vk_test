@@ -30,13 +30,18 @@ public:
             std::lock_guard<std::mutex> lk(_mx);
             copy = _metrics;
         }
+
         std::map<uint64_t, std::vector<std::pair<std::string, std::string>>> bins;
-        for (auto& m : copy) m->collect(bins, bin_width_ms);
+        for (auto& m : copy) {
+            m->collect(bins, bin_width_ms);
+        }
 
         for (auto& [ts_bin, kv] : bins) {
             std::ostringstream oss;
             oss << metric_time::ts_to_string(ts_bin);
-            for (auto& [k, v] : kv) oss << " \"" << k << "\" " << v;
+            for (auto& [k, v] : kv) {
+                oss << " \"" << k << "\" " << v;
+            }
             out.push_back(std::move(oss).str());
         }
     }
