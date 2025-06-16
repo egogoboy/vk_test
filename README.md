@@ -11,4 +11,4 @@ make
 ./tests/test_main
 ```
 
-Логи лежат в metrix.txt
+Логи лежат в metrics.txt
