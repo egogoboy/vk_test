@@ -15,7 +15,7 @@ namespace metrics {
 class MetricWriter {
 public:
     MetricWriter(MetricRegistry& reg, std::string file, uint64_t flush_ms = 1000,
-                 uint64_t bin_width_ms = 100);
+                 uint64_t bin_width_ms = 1);
     ~MetricWriter();
 
     void start(bool to_console = false);
