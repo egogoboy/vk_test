@@ -86,8 +86,8 @@ http->add(67);
 ### Сборка и запуск примера
 ```bash
 git clone https://github.com/egogoboy/vk_test
-md build
-cd build
+cd vk_test
+md build && cd build
 cmake ..
 make
 ./tests/test_main
