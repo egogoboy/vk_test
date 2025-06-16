@@ -1,5 +1,5 @@
-#include <metrics/Metric.h>
-#include <metrics/MetricRegistry.h>
+#include <utils/types.hpp>
+#include <metrics/MetricRegistry.hpp>
 #include <metrics/MetricWriter.h>
 
 #include <chrono>
@@ -7,21 +7,19 @@
 #include <thread>
 
 int main() {
-    MetricRegistry registry;
+    metrics::MetricRegistry registry;
 
-    auto cpu = std::make_shared<Metric<double>>("CPU");
-    auto http = std::make_shared<Metric<int>>("HTTP requets RPS");
+    auto cpu = registry.create_metric<double, metrics::MetricBuffered>("CPU");
+    auto http = registry.create_metric<double>("HTTP requests RPS");
 
-    registry.add_metric(cpu);
-    registry.add_metric(http);
-
-    MetricWriter writer(registry, "metrics.txt", 100);
-    writer.on_console();
-    writer.start();
+    metrics::MetricWriter writer(registry, "metrics.txt", 1000);
+    writer.to_console(true);
+    writer.start(true);
 
     for (int i = 0; i < 100; ++i) {
-        cpu->add_value(0.5 + std::rand() % 100 * 0.001);
-        http->add_value(30 + std::rand() % 30);
+        cpu->add(0.5 + std::rand() % 100 * 0.001);
+        http->add(30 + std::rand() % 30);
+        std::cout << i << std::endl;
         std::this_thread::sleep_for((std::chrono::milliseconds(100)));
     }
     

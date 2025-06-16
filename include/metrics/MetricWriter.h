@@ -1,8 +1,6 @@
 #pragma once
 
-#include "utils/Timestamp.h"
-#include "MetricRegistry.h"
-
+#include <condition_variable>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -10,23 +8,31 @@
 #include <iomanip>
 #include <thread>
 
+#include <metrics/MetricRegistry.hpp>
+
+namespace metrics {
+
 class MetricWriter {
 public:
-    MetricWriter(MetricRegistry& registry, const std::string& filename, int interval_ms);
+    MetricWriter(MetricRegistry& reg, std::string file, uint64_t flush_ms = 1000,
+                 uint64_t bin_width_ms = 100);
     ~MetricWriter();
 
-    void start();
+    void start(bool to_console = false);
     void stop();
-    void on_console();
-    void off_console();
+
+    void to_console(bool f = false);
 
 private:
-    MetricRegistry& _registry;
-    std::string _filename;
-    int _interval_ms;
-    std::atomic<bool> _stop_flag;
-    std::thread _main_thread;
-    bool _console_out_flag;
+    void _loop();
 
-    std::string _make_log_string();
+    MetricRegistry& _reg;
+    std::string _file;
+    uint64_t _flush_ms;
+    uint64_t _bin_width;
+    bool _to_console{false};
+    std::atomic<bool> _run{false};
+    std::thread _th;
 };
+
+}

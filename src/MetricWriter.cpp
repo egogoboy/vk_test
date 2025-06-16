@@ -1,64 +1,54 @@
 #include <metrics/MetricWriter.h>
-#include <sstream>
 
-MetricWriter::MetricWriter(MetricRegistry& registry, const std::string& filename, int interval_ms)
-    : _registry{registry}, 
-      _filename{filename}, 
-      _interval_ms{interval_ms}, 
-      _stop_flag{false},
-      _console_out_flag{false} {}
+metrics::MetricWriter::MetricWriter(MetricRegistry& reg, std::string file, uint64_t flush_ms,
+             uint64_t bin_width_ms)
+    : _reg(reg),
+      _file(std::move(file)),
+      _flush_ms(flush_ms),
+      _bin_width(bin_width_ms) {}
 
-MetricWriter::~MetricWriter() {
+metrics::MetricWriter::~MetricWriter() {
     stop();
 }
 
-void MetricWriter::start() {
-    _main_thread = std::thread([this]() {
-        std::ofstream fout(_filename);
-        if (!fout.is_open()) {
-            std::cerr << "Unable to open " << _filename << " file." << std::endl;
-            return 0;
-        }
-        
-        std::string log_string;
-        while (!_stop_flag.load()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(_interval_ms));
-            log_string = _make_log_string(); 
+void metrics::MetricWriter::start(bool to_console) {
+    _to_console = to_console;
+    _run = true;
+    _th = std::thread(&MetricWriter::_loop, this);
+}
 
-            fout << log_string;
-            if (_console_out_flag) {
-                std::cout << log_string;
+void metrics::MetricWriter::stop() {
+    _run = false;
+    if (_th.joinable()) {
+        _th.join();
+    }
+}
+
+void metrics::MetricWriter::_loop() {
+    std::ofstream fout(_file, std::ios::app);
+    if (!fout) {
+        std::cerr << "Cannot open " << _file << "\n";
+        return;
+    }
+    while (_run) {
+        auto start = std::chrono::steady_clock::now();
+        std::vector<std::string> lines;
+        _reg.make_lines(lines, _bin_width);
+        for (auto& l : lines) {
+            fout << l << '\n';
+            if (_to_console) {
+                std::cout << l << '\n';
             }
         }
-    });
-}
-
-void MetricWriter::stop() {
-    _stop_flag.store(true);
-    if (_main_thread.joinable()) {
-        _main_thread.join();
-        std::cout << "All metrics saved to " << _filename << "\n";
+        fout.flush();
+        auto spent = std::chrono::steady_clock::now() - start;
+        auto sleep = std::chrono::milliseconds(_flush_ms) - spent;
+        if (sleep.count() > 0) {
+            std::this_thread::sleep_for(sleep);
+        }
     }
 }
 
-std::string MetricWriter::_make_log_string() {
-    std::ostringstream oss;
-    auto metrics = _registry.get_all_metrics();
-
-    oss << timestamp::get_current_timestamp();
-    for (const auto& metric : metrics) {
-        auto [name, value] = metric->get_string_value();
-        oss << " \"" << name << "\" " << value;
-    }
-    oss << "\n";
-
-    return oss.str();
-}
-
-void MetricWriter::on_console() {
-    _console_out_flag = true;
-}
-
-void MetricWriter::off_console() {
-    _console_out_flag = false;
+void metrics::MetricWriter::to_console(bool f) {
+    _to_console = f;
 }
