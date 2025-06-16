@@ -99,6 +99,7 @@ int main() {
 
     std::cout << "Runtime without metrics: " << clean_run_time.count() << std::endl;
     std::cout << "Runtime with snapshot metrics: " << snapshot_run_time.count() << std::endl;
-    std::cout << "Runtime with bufered metrics and console: " << buffered_run_time.count() << std::endl;
+    std::cout << "Runtime with bufered metrics" << (choice == 'y' ? " and console" : "") << ": " << buffered_run_time.count() << std::endl;
+
     return 0;
 }
